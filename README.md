@@ -58,4 +58,4 @@ python midi_player.py
 
 ## License / 许可证  
 
-MIT License / MIT 许可证
+GTL 3.0 License / GTL 3.0 许可证
