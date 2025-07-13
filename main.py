@@ -13,7 +13,7 @@ colorama.init()
 
 # 颜色定义
 COLOR_RESET = '\033[0m'
-COLOR_CLEAR = '\033[2J\033[H'
+COLOR_CLEAR = '\033[H'
 COLOR_BG_WHITE = '\033[47m'
 TRACK_COLORS = [
     '\033[41m',  # 红
@@ -85,22 +85,21 @@ class MIDIPlayer:
         self._init_keyboard_layout()
 
     def _init_keyboard_layout(self):
-        """初始化键盘布局，全音空一格，半音不空"""
+        """初始化键盘布局，可分别设置全音和半音的间隔数，宽度自适应"""
+        # 可自定义间隔数
+        whole_step = 1  # 全音间隔
+        half_step = 1   # 半音间隔
         pos = 0
         self.keyboard_positions = []
-        # 创建完整的键盘布局
+        self.note_pos_map = {}
         for note in range(self.min_note, self.max_note + 1):
             note_name = NOTE_NAMES[note % 12]
-            is_black_key = '#' in note_name
-
             self.note_pos_map[note] = pos
             self.keyboard_positions.append((pos, note_name))
-
-            if not is_black_key:
-                pos += 2  # 全音空一格
+            if '#' in note_name:
+                pos += half_step
             else:
-                pos += 2  # 半音不空
-
+                pos += whole_step
         self.display_width = pos + 1
 
     def clear_screen(self):
@@ -138,6 +137,8 @@ class MIDIPlayer:
             return True
         except Exception as e:
             print(f"加载MIDI文件失败: {e}")
+            print("请检查MIDI文件是否损坏或格式不兼容。建议用专业MIDI编辑器重新导出。")
+            self.midi_file = None
             return False
 
     def analyze_midi_file(self):
@@ -177,12 +178,12 @@ class MIDIPlayer:
 
     def get_instrument_name(self, program: int) -> str:
         instruments = [
-            "钢琴", "明亮钢琴", "电钢琴", "酒吧钢琴", "罗德钢琴", "合唱钢琴", "羽管键琴", " clavinet",
+            "钢琴", "明亮钢琴", "电钢琴", "酒吧钢琴", "罗德钢琴", "合唱钢琴", "羽管键琴", "clavinet",
             "钢片琴", "钟琴", "音乐盒", "颤音琴", "马林巴", "木琴", "管钟", "大扬琴",
             "电风琴", "拉杆风琴", "摇滚风琴", "教堂风琴", "簧风琴", "手风琴", "口琴", "探戈手风琴",
             "尼龙吉他", "钢弦吉他", "爵士吉他", "清音吉他", "闷音吉他", "过载吉他", "失真吉他", "和声吉他",
-            "原声贝斯", "指弹贝斯", "拨片贝斯", "无品贝斯", " slap贝斯1", " slap贝斯2", "合成贝斯1", "合成贝斯2",
-            "小提琴", "中提提琴", "大提琴", "低音提琴", "颤音弦乐", "拨奏弦乐", "竖琴", "定音鼓",
+            "原声贝斯", "指弹贝斯", "拨片贝斯", "无品贝斯", "slap贝斯1", "slap贝斯2", "合成贝斯1", "合成贝斯2",
+            "小提琴", "中提琴", "大提琴", "低音提琴", "颤音弦乐", "拨奏弦乐", "竖琴", "定音鼓",
             "弦乐合奏1", "弦乐合奏2", "合成弦乐1", "合成弦乐2", "合唱人声", "人声哼唱", "合成人声", "管弦乐打击乐",
             "小号", "长号", "大号", "弱音小号", "法国号", "铜管组", "合成铜管1", "合成铜管2",
             "高音萨克斯", "中音萨克斯", "次中音萨克斯", "上低音萨克斯", "双簧管", "英国管", "巴松管", "单簧管",
@@ -202,19 +203,162 @@ class MIDIPlayer:
 
         instruments_str = "、".join([f"{count}{name}" for name, count in self.instruments.items()])
         bpm = int(60000000 / self.tempo)
-        header = (f"文件名: {os.path.basename(self.midi_file.filename)} "
-                  f"音轨数: {len(self.midi_file.tracks)} "
-                  f"乐器: {instruments_str} "
-                  f"速度: {bpm}BPM")
-        print(header[:self.display_width].ljust(self.display_width))
+        # 统计音符数
+        note_count = 0
+        all_notes = []
+        for track in self.midi_file.tracks:
+            for msg in track:
+                if msg.type == 'note_on' and msg.velocity > 0:
+                    note_count += 1
+                    all_notes.append(msg.note)
+        # 更精确的调式判断：统计所有note_on，判断C大调/A小调/其他
+        pitch_classes = [n % 12 for n in all_notes]
+        pitch_hist = [pitch_classes.count(i) for i in range(12)]
+        # 更复杂的调式分析：统计所有音级，判断最可能的大调/小调
+        # 12个大调和12个小调的音级集合
+        MAJOR_SCALES = [
+            [0,2,4,5,7,9,11],  # C大调
+            [1,3,5,6,8,10,0], # C#
+            [2,4,6,7,9,11,1], # D
+            [3,5,7,8,10,0,2], # D#
+            [4,6,8,9,11,1,3], # E
+            [5,7,9,10,0,2,4], # F
+            [6,8,10,11,1,3,5],# F#
+            [7,9,11,0,2,4,6], # G
+            [8,10,0,1,3,5,7], # G#
+            [9,11,1,2,4,6,8], # A
+            [10,0,2,3,5,7,9], # A#
+            [11,1,3,4,6,8,10] # B
+        ]
+        MINOR_SCALES = [
+            [0,2,3,5,7,8,10], # A小调
+            [1,3,4,6,8,9,11], # A#
+            [2,4,5,7,9,10,0], # B
+            [3,5,6,8,10,11,1],# C
+            [4,6,7,9,11,0,2], # C#
+            [5,7,8,10,0,1,3], # D
+            [6,8,9,11,1,2,4], # D#
+            [7,9,10,0,2,3,5], # E
+            [8,10,11,1,3,4,6],# F
+            [9,11,0,2,4,5,7], # F#
+            [10,0,1,3,5,6,8], # G
+            [11,1,2,4,6,7,9]  # G#
+        ]
+        major_score = [sum([pitch_hist[n] for n in scale]) for scale in MAJOR_SCALES]
+        minor_score = [sum([pitch_hist[n] for n in scale]) for scale in MINOR_SCALES]
+        best_major = max(range(12), key=lambda i: major_score[i])
+        best_minor = max(range(12), key=lambda i: minor_score[i])
+        if major_score[best_major] >= minor_score[best_minor]:
+            mode = f"\033[1m调式: \033[0m{NOTE_NAMES[best_major]}大调 (匹配度:{major_score[best_major]})"
+        else:
+            mode = f"\033[1m调式: \033[0m{NOTE_NAMES[best_minor]}小调 (匹配度:{minor_score[best_minor]})"
+        # 更精确的和弦数统计：遍历所有note_on事件，按时间分组，统计和弦
+        chord_count = 0
+        last_time = None
+        chord_notes = set()
+        for track in self.midi_file.tracks:
+            abs_time = 0
+            for msg in track:
+                abs_time += msg.time
+                if msg.type == 'note_on' and msg.velocity > 0:
+                    if last_time is None or abs_time - last_time > 0.5:
+                        if chord_notes:
+                            chord_count += 1
+                        chord_notes = set()
+                        last_time = abs_time
+                    chord_notes.add(msg.note)
+            if chord_notes:
+                chord_count += 1
+        header = (f"\033[1m文件名: \033[0m{os.path.basename(self.midi_file.filename)} "
+                  f"\033[1m音轨数: \033[0m{len(self.midi_file.tracks)} "
+                  f"\033[1m乐器: \033[0m{instruments_str} "
+                  f"\033[1m速度: \033[0m{bpm}BPM "
+                  f"\033[1m{mode} \033[0m"
+                  f"\033[1m音符数: \033[0m{note_count} "
+                  f"\033[1m和弦数: \033[0m{chord_count}")
+        print(header.ljust(self.display_width))
+
+    def detect_chord(self, notes):
+        """
+        检测当前音符集合对应的和弦，返回和弦名称、和弦音程、根音。
+        notes: List[int] 当前按下的音符编号
+        """
+        if not notes:
+            return "", [], None
+        notes = sorted(set(notes))
+        root = notes[0] % 12
+        intervals = [(n - notes[0]) % 12 for n in notes]
+        chord_defs = [
+            ("",    [0, 4, 7]),
+            ("maj", [0, 4, 7]),
+            ("m",   [0, 3, 7]),
+            ("min", [0, 3, 7]),
+            ("dim", [0, 3, 6]),
+            ("aug", [0, 4, 8]),
+            ("sus2",[0, 2, 7]),
+            ("sus4",[0, 5, 7]),
+            ("7",    [0, 4, 7, 10]),
+            ("maj7", [0, 4, 7, 11]),
+            ("m7",   [0, 3, 7, 10]),
+            ("m7b5", [0, 3, 6, 10]),
+            ("dim7", [0, 3, 6, 9]),
+            ("mMaj7",[0, 3, 7, 11]),
+            ("7b5",  [0, 4, 6, 10]),
+            ("7#5",  [0, 4, 8, 10]),
+            ("aug7", [0, 4, 8, 10]),
+            ("6",    [0, 4, 7, 9]),
+            ("m6",   [0, 3, 7, 9]),
+            ("6/9",  [0, 4, 7, 9, 14]),
+            ("9",    [0, 4, 7, 10, 14]),
+            ("maj9", [0, 4, 7, 11, 14]),
+            ("m9",   [0, 3, 7, 10, 14]),
+            ("add9", [0, 4, 7, 14]),
+            ("madd9",[0, 3, 7, 14]),
+            ("11",    [0, 4, 7, 10, 14, 17]),
+            ("maj11", [0, 4, 7, 11, 14, 17]),
+            ("m11",   [0, 3, 7, 10, 14, 17]),
+            ("7#11",  [0, 4, 7, 10, 14, 18]),
+            ("13",    [0, 4, 7, 10, 14, 17, 21]),
+            ("maj13", [0, 4, 7, 11, 14, 17, 21]),
+            ("m13",   [0, 3, 7, 10, 14, 17, 21]),
+            ("7b9",   [0, 4, 7, 10, 13]),
+            ("7#9",   [0, 4, 7, 10, 15]),
+            ("7b13",  [0, 4, 7, 10, 14, 20]),
+            ("alt7",  [0, 4, 6, 10, 13, 18]),
+            ("7sus2", [0, 2, 7, 10]),
+            ("7sus4", [0, 5, 7, 10]),
+            ("9sus4", [0, 5, 7, 10, 14]),
+            ("m7b9",  [0, 3, 7, 10, 13]),
+            ("m7#5",  [0, 3, 8, 10]),
+            ("m9b5",  [0, 3, 6, 10, 14]),
+            ("7b9#9", [0, 4, 7, 10, 13, 15]),
+            ("7b9#11",[0, 4, 7, 10, 13, 18]),
+            ("7/6",   [0, 4, 7, 9, 10]),
+            ("9/13",  [0, 4, 7, 10, 14, 21]),
+        ]
+        for name, pattern in chord_defs:
+            if all(i in intervals for i in pattern) and len(intervals) >= len(pattern):
+                chord_name = NOTE_NAMES[root] + name
+                chord_notes = [NOTE_NAMES[(root + i) % 12] for i in pattern]
+                return chord_name, chord_notes, root
+        return "", [], None
+
+    def display_chord(self, chord_name, chord_notes, duration):
+        """
+        在乐谱下方显示和弦名、持续时间、构成音
+        """
+        if chord_name:
+            print(f"\033[1m和弦:\033[0m {chord_name}  \033[1m持续:\033[0m {duration:.2f}s  \033[1m构成:\033[0m {' '.join(chord_notes)}\033[K")
+        else:
+            print("\033[1m和弦:\033[0m 无\033[K")
 
     def display_keyboard(self, block_queue=None):
-        print("\033[2;1H\033[K")  # 清屏并将光标移动到左上角
+        print("\033[1;1H")  # 将光标移动到左上角
         screen_lines = [[' ' for _ in range(self.display_width)] for _ in range(self.display_height)]
         # 绘制静态的竖线
         for pos, name in self.keyboard_positions:
             for line in range(self.display_height):
-                screen_lines[line][pos] = '|'
+                screen_lines[line][pos] = '\033[0m|'
         # 显示下落方块
         if block_queue:
             for block in block_queue:
@@ -226,11 +370,31 @@ class MIDIPlayer:
                     line = min(steps, self.display_height - 1)
                     color = TRACK_COLORS[track % len(TRACK_COLORS)]
                     screen_lines[line][pos] = f"{color} {COLOR_RESET}"
-        # 显示键盘名称（只显示白键名称）
+        # 显示键盘名称（底部键盘根据当前播放音符变色，包含半音）
         keyboard_line = [' ' for _ in range(self.display_width)]
+        # 统计当前正在播放的音符及其轨道
+        note_color_map = {}
+        for note, events in self.active_notes.items():
+            if events:
+                track = events[-1].track
+                color = TRACK_COLORS[track % len(TRACK_COLORS)]
+                pos = self.note_pos_map.get(note)
+                if pos is not None:
+                    note_color_map[pos] = (color, NOTE_NAMES[note % 12])
         for pos, name in self.keyboard_positions:
-            if '#' not in name:
-                keyboard_line[pos] = name[0]
+            if pos in note_color_map:
+                color, note_name = note_color_map[pos]
+                # 白键显示字母，黑键显示#
+                if '#' in note_name:
+                    keyboard_line[pos] = f"{color}#{COLOR_RESET}"
+                else:
+                    keyboard_line[pos] = f"{color}{name[0]}{COLOR_RESET}"
+            else:
+                # 白键显示字母，黑键显示#
+                if '#' in name:
+                    keyboard_line[pos] = '#'
+                else:
+                    keyboard_line[pos] = name[0]
         self.clear_screen()
         self.display_header()
         for line in screen_lines:
@@ -360,6 +524,9 @@ class MIDIPlayer:
         block_queue = []  # [(note, velocity, track, 剩余下落步数)]
         idx = 0
         total_events = len(events)
+        last_chord = None
+        now = 0  # 修复 UnboundLocalError，初始化 now 变量
+        last_chord_time = now
         # 假设每个方块下落到底需要 N 步
         DROP_STEPS = 5
         while idx < total_events or block_queue:
@@ -377,6 +544,16 @@ class MIDIPlayer:
                 block['steps'] += 1
             # 显示方块（每个方块只下落一格竖线）
             self.display_keyboard(block_queue)
+            # ====== 和弦检测与显示 ======
+            # 获取当前所有激活音符
+            current_notes = [note for note in self.active_notes if self.active_notes[note]]
+            chord_name, chord_notes, _ = self.detect_chord(current_notes)
+            if chord_name != last_chord:
+                last_chord = chord_name
+                last_chord_time = now
+            duration = now - last_chord_time if chord_name else 0
+            self.display_chord(chord_name, chord_notes, duration)
+            # ==========================
             # 检查是否有方块到底
             to_remove = []
             for i, block in enumerate(block_queue):
@@ -448,4 +625,5 @@ if __name__ == "__main__":
         else:
             choice = int(choice)
         output_port = ports[choice] if 0 <= choice < len(ports) else ports[0]
+        player.load_midi_file(file_path)
         player.play_midi_loop(file_path, output_port)
