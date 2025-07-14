@@ -1,0 +1,30 @@
+{
+  "min_note": 48,
+  "max_note": 84,
+  "display_height": 40,
+  "block_drop_time": 0.5,
+  "default_tempo": 500000,
+  "ticks_per_beat": 480,
+  "track_colors": [
+    "\u001b[41m",
+    "\u001b[42m",
+    "\u001b[43m",
+    "\u001b[44m",
+    "\u001b[45m",
+    "\u001b[46m",
+    "\u001b[100m",
+    "\u001b[101m",
+    "\u001b[102m",
+    "\u001b[103m",
+    "\u001b[104m",
+    "\u001b[105m",
+    "\u001b[106m"
+  ],
+  "note_names": ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+  "color_reset": "\u001b[0m",
+  "color_clear": "\u001b[H",
+  "color_bg_white": "\u001b[47m",
+  "language": "lang/zh-CN.json",
+  "whole_step": 1,
+  "half_step": 1
+}
