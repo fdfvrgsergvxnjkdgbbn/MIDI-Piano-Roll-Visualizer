@@ -1,8 +1,16 @@
+# 修复了部分问题 by CHCAT1320
+# 修复了各处引号错误 by CHCAT1320
+# 添加英文支持 by CHCAT1320
 import mido
 import time
 import threading
 import os
+
+# 修复在vscode中运行时输出乱码问题 by CHCAT1320
 import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional
@@ -171,7 +179,7 @@ class MIDIPlayer:
             self.analyze_midi_file()
             return True
         except Exception as e:
-            print(f"{LANG.get("load_failed","加载MIDI文件失败: ")}{e}")
+            print(f"{LANG.get('load_failed','加载MIDI文件失败: ')} {e}")
             print(LANG.get("file_check","请检查MIDI文件是否损坏或格式不兼容。建议用专业MIDI编辑器重新导出。"))
             self.midi_file = None
             return False
@@ -270,9 +278,9 @@ class MIDIPlayer:
         best_major = max(range(12), key=lambda i: major_score[i])
         best_minor = max(range(12), key=lambda i: minor_score[i])
         if major_score[best_major] >= minor_score[best_minor]:
-            mode = f"\033[1m{LANG.get("mode","调式:")}\033[0m{NOTE_NAMES[best_major]}{LANG.get("major","大调")} ({LANG.get("match","匹配度:")}{major_score[best_major]})"
+            mode = f"\033[1m{LANG.get('mode','调式:')}\033[0m{NOTE_NAMES[best_major]}{LANG.get('major','大调')} ({LANG.get('match','匹配度:')}{major_score[best_major]})"
         else:
-            mode = f"\033[1m{LANG.get("mode","调式:")}\033[0m{NOTE_NAMES[best_minor]}{LANG.get("minor","小调")} ({LANG.get("match","匹配度:")}{minor_score[best_minor]})"
+            mode = f"\033[1m{LANG.get('mode','调式:')}\033[0m{NOTE_NAMES[best_minor]}{LANG.get('minor','小调')} ({LANG.get('match','匹配度:')}{minor_score[best_minor]})"
         # 更精确的和弦数统计：遍历所有note_on事件，按时间分组，统计和弦
         chord_count = 0
         last_time = None
@@ -290,13 +298,13 @@ class MIDIPlayer:
                     chord_notes.add(msg.note)
             if chord_notes:
                 chord_count += 1
-        header = (f"\033[1m{LANG.get("filename","文件名:")}\033[0m{os.path.basename(self.midi_file.filename)} "
-                  f"\033[1m{LANG.get("tracks","音轨数:")}\033[0m{len(self.midi_file.tracks)} "
-                  f"\033[1m{LANG.get("instrument","乐器:")}\033[0m{instruments_str} "
-                  f"\033[1m{LANG.get("tempo","速度:")}\033[0m{bpm}BPM "
+        header = (f"\033[1m{LANG.get('filename','文件名:')}\033[0m{os.path.basename(self.midi_file.filename)} "
+                  f"\033[1m{LANG.get('tracks','音轨数:')}\033[0m{len(self.midi_file.tracks)} "
+                  f"\033[1m{LANG.get('instrument','乐器:')}\033[0m{instruments_str} "
+                  f"\033[1m{LANG.get('tempo','速度:')}\033[0m{bpm}BPM "
                   f"\033[1m{mode}\033[0m"
-                  f"\033[1m{LANG.get("notes","音符数:")}\033[0m{note_count} "
-                  f"\033[1m{LANG.get("chords","和弦数:")}\033[0m{chord_count}")
+                  f"\033[1m{LANG.get('notes','音符数:')}\033[0m{note_count} "
+                  f"\033[1m{LANG.get('chords','和弦数:')}\033[0m{chord_count}")
         print(header.ljust(self.display_width))
 
     def detect_chord(self, notes):
@@ -365,9 +373,9 @@ class MIDIPlayer:
         在乐谱下方显示和弦名、持续时间、构成音
         """
         if chord_name:
-            print(f"\033[43;1H\033[1m{LANG.get("label","和弦:")}\033[0m {chord_name}  \033[1m{LANG.get("duration","持续:")}\033[0m {duration:.2f}{LANG.get("seconds","s")}  \033[1m{LANG.get("components","构成:")}\033[0m {' '.join(chord_notes)}\033[K")
+            print(f"\033[43;1H\033[1m{LANG.get('label','和弦:')}\033[0m {chord_name}  \033[1m{LANG.get('duration','持续:')}\033[0m {duration:.2f}{LANG.get('seconds','s')}  \033[1m{LANG.get('components','构成:')}\033[0m {' '.join(chord_notes)}\033[K")
         else:
-            print(f"\033[43;1H\033[1m{LANG.get("label","和弦:")}\033[0m {LANG.get("none","无")}\033[K")
+            print(f"\033[43;1H\033[1m{LANG.get('label','和弦:')}\033[0m {LANG.get('none','无')}\033[K")
 
     def display_keyboard(self, block_queue=None):
         print("\033[1;1H")  # 将光标移动到左上角
@@ -642,7 +650,8 @@ if __name__ == "__main__":
         print(LANG.get("select_port","请选择设备编号(默认0):"))
         for i, port in enumerate(ports):
             print(f"{i}: {port}")
-        choice = input(LANG.get("enter_midi_path","请输入MIDI文件路径:")).strip()
+        # 修复此处对话错误 by CHCAT1320
+        choice = input(LANG.get("select_port","请输入设备编号:")).strip()
         print("\033[?25l\033[2J\033[H")  # 隐藏光标并清屏
         if not choice:
             choice = 0
