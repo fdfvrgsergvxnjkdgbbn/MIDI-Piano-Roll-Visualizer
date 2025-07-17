@@ -13,7 +13,9 @@ A Python-based MIDI player with piano roll visualization that displays falling n
 - 🎶 Real-time chord detection and display / 实时和弦检测与显示  
 - 🎻 Automatic key/mode detection (major/minor) / 自动调式检测(大调/小调)  
 - 📊 Music theory analysis (note count, chord count) / 乐理分析(音符数、和弦数统计)  
-- 🎚️ Customizable keyboard layout (whole/half step spacing) / 可自定义键盘布局(全音/半音间隔)  
+- 🎚️ Customizable keyboard layout (whole/half step spacing) / 可自定义键盘布局(全音/半音间隔)
+- <sup style="font-size: 0.7em;">文</sup>/<sub>A</sub> Multilingual support / 多语言支持
+- ⚙️ Free setting / 自由设置
 
 ## Requirements / 系统要求  
 
@@ -24,7 +26,7 @@ A Python-based MIDI player with piano roll visualization that displays falling n
 ## Installation / 安装  
 
 ```bash
-pip install mido colorama
+pip install mido colorama python-rtmidi
 ```  
 
 ## Usage / 使用方法  
