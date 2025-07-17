@@ -1,11 +1,11 @@
-# MIDI Piano Roll Visualizer / MIDI 钢琴卷帘可视化播放器  
+# 🎹 MIDI Piano Roll Visualizer / MIDI 钢琴卷帘可视化播放器  
 
 ![Screenshot](效果图.jpg)  
 
 A Python-based MIDI player with piano roll visualization that displays falling notes in real-time, with chord detection and music theory analysis.  
 一个基于 Python 的 MIDI 文件播放器，带有钢琴卷帘可视化效果，可实时显示音符下落，并具备和弦检测和乐理分析功能。
 
-## Features / 功能特点  
+## 😎 Features / 功能特点  
 
 - 🎵 Play standard MIDI files with tempo detection / 支持标准 MIDI 文件播放及速度检测  
 - 🎹 Interactive piano keyboard visualization / 交互式钢琴键盘可视化  
@@ -17,19 +17,19 @@ A Python-based MIDI player with piano roll visualization that displays falling n
 - <sup style="font-size: 0.7em;">文</sup>/<sub>A</sub> Multilingual support / 多语言支持
 - ⚙️ Free setting / 自由设置
 
-## Requirements / 系统要求  
+## <svg width="1em" height="1em" viewBox="0 0 100 100" style="border-radius:15%"><rect x="0" y="0" width="45" height="45" rx="5" fill="#00A4EF"/><rect x="55" y="0" width="45" height="45" rx="5" fill="#7FBA00"/><rect x="0" y="55" width="45" height="45" rx="5" fill="#FFB900"/><rect x="55" y="55" width="45" height="45" rx="5" fill="#F25022"/></svg> Requirements / 系统要求  
 
 - Python 3.6+  
 - Terminal with ANSI color support / 支持 ANSI 颜色的终端  
 - MIDI output device (optional) / MIDI 输出设备(可选)  
 
-## Installation / 安装  
+## ⬇️ Installation / 安装  
 
 ```bash
 pip install mido colorama python-rtmidi
 ```  
 
-## Usage / 使用方法  
+## 🖱️ Usage / 使用方法  
 
 1. Run the program:  
 ```bash
@@ -42,11 +42,11 @@ python main.py
 
 4. Enjoy the visualization! / 享受可视化效果!  
 
-## Keyboard Controls / 键盘控制  
+## ⌨️ Keyboard Controls / 键盘控制  
 
 - `Ctrl+C` - Stop playback / 停止播放  
 
-## Technical Highlights / 技术亮点  
+## 💡 Technical Highlights / 技术亮点  
 
 - 🎼 Advanced chord detection algorithm supporting 40+ chord types / 支持40+种和弦类型的检测算法  
 - 🎚️ Dynamic keyboard layout adjustment based on song range / 基于乐曲音域的动态键盘布局调整  
@@ -54,7 +54,7 @@ python main.py
 - ⏱️ Precise tempo and timing handling / 精确的速度和时序处理  
 - 🎵 Comprehensive MIDI meta information display / 完整的 MIDI 元信息显示  
 
-## License / 许可证  
+## 📚 License / 许可证  
 
 ```text
 GNU GENERAL PUBLIC LICENSE
@@ -76,13 +76,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
-## Known Limitations / 已知限制  
+## ⚠️ Known Limitations (mistake) / 已知限制（错误）  
 
-- Complex MIDI files may experience minor timing drift / 复杂 MIDI 文件可能出现轻微时序漂移  
+- Complex MIDI files may experience minor timing drift / 复杂 MIDI 文件可能出现轻微时序漂移
 - Some terminal emulators may have display artifacts / 部分终端模拟器可能出现显示异常  
-- Maximum polyphony not enforced / 未限制最大复音数  
+- Maximum polyphony not enforced / 未限制最大复音数
+- Error reporting crash caused by unknown reasons / 因为只原因导致的报错崩溃
+- 🔧 Midi music with more than 108 tones cannot be played (Under revision) / 无法播放超过108音的midi音乐（修改中） 
 
-## Contributing / 贡献指南  
+## 🎉 Contributing / 贡献指南  
 
 Pull requests are welcome! Please ensure your changes:  
 欢迎提交 Pull Request! 请确保您的修改:  
