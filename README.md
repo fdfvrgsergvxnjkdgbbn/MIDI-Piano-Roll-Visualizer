@@ -5,6 +5,8 @@
 A Python-based MIDI player with piano roll visualization that displays falling notes in real-time, with chord detection and music theory analysis.  
 一个基于 Python 的 MIDI 文件播放器，带有钢琴卷帘可视化效果，可实时显示音符下落，并具备和弦检测和乐理分析功能。
 
+**Author's bilibili / 作者bilibili:** <a href="https://b23.tv/N0rKL92">雷石东_RedStone</a>
+
 ## 😎 Features / 功能特点  
 
 - 🎵 Play standard MIDI files with tempo detection / 支持标准 MIDI 文件播放及速度检测  
