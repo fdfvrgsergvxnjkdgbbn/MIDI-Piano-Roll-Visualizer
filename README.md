@@ -3,11 +3,11 @@
 ![Screenshot](效果图.jpg)  
 
 A Python-based MIDI player with piano roll visualization that displays falling notes in real-time, with chord detection and music theory analysis.  
-一个基于 Python 的 MIDI 文件播放器，带有钢琴卷帘可视化效果，可实时显示音符下落，并具备和弦检测和乐理分析功能。
+一个基于 Python 的 MIDI 文件播放器，带有钢琴卷帘可视化效果，可实时显示音符下落，并具备和弦检测和乐理分析功能。  
 
-**Author's bilibili / 作者bilibili:** <a href="https://b23.tv/N0rKL92">雷石东_RedStone</a>
-**It is forbidden to use it for illegal and commercial purposes without my permission / 未经本人许可禁止用于非法和商业用途**
-**In case of any discrepancy between Chinese and English, Chinese shall prevail / 当中英文内容出现分歧时以中文为准**
+**Author's bilibili / 作者bilibili:** <a href="https://b23.tv/N0rKL92">雷石东_RedStone</a>  
+**It is forbidden to use it for illegal and commercial purposes without my permission / 未经本人许可禁止用于非法和商业用途**  
+**In case of any discrepancy between Chinese and English, Chinese shall prevail / 当中英文内容出现分歧时以中文为准**  
 
 ## 😎 Features / 功能特点  
 
